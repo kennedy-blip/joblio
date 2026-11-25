@@ -1,0 +1,38 @@
+Kennedy Wanjiru
+Final-year Computer Science student · sales development and technical support
+kennedy.wanjiru@example.com  ·  +254 712 000 000  ·  Nairobi, Kenya (EAT, UTC+3)
+github.com/kennedy-wanjiru  ·  linkedin.com/in/kennedy-wanjiru  ·  kennedy.dev
+SUMMARY
+Final-year Computer Science student · sales development and technical support. Targeting the Customer Support Specialist role at Northwind Labs. Skills include Customer Support, Zendesk, HubSpot, JavaScript, TypeScript.
+EDUCATION
+BSc, Computer Science	Sep 2023 – Expected Nov 2026
+University of Nairobi
+Coursework: databases, distributed systems, human-computer interaction. Dean's list 2024.
+PROJECTS
+Shamba Prices	github.com/kennedy-wanjiru/shamba-prices
+Built a Next.js and PostgreSQL app that tracks maize prices across 14 markets, used by 220 farmers in the first month.
+Wrote the API in TypeScript with scheduled ingestion and 74% test coverage.
+Designed the mobile-first interface in Figma and tested it with nine users before launch.
+Ticket Triage Bot	github.com/kennedy-wanjiru/triage-bot
+Trained a scikit-learn classifier on 4,000 anonymised tickets and reached 88% routing accuracy.
+Wrapped it in a FastAPI service and documented the endpoints for the support team.
+EXPERIENCE
+Sales Development Representative (part-time)	Mar 2025 – Present
+Sahili Cloud · Nairobi, Kenya (remote)
+Built a HubSpot pipeline with 1,200 contacts and cut duplicate records by 34% in the first quarter.
+Answered first-line technical questions in Zendesk, resolving 62% of tickets without escalation.
+Booked 41 qualified demos in six months by running cold outreach sequences to fintech founders across East Africa.
+Wrote 18 email sequences and lifted reply rate from 4% to 11% by testing subject lines weekly.
+Web Developer	Jun 2024 – Feb 2025
+Freelance · Remote
+Shipped four React and Node.js sites for small businesses, including a booking flow that handled 300 bookings a month.
+Migrated a client from a spreadsheet to PostgreSQL and cut monthly reporting time from six hours to 40 minutes.
+Ran a weekend hackathon for 60 students on the university tech society committee.
+Set up CI checks on GitHub Actions so every pull request ran tests before merge.
+Customer Support Intern	Jan 2024 – May 2024
+Mkopo Finance · Nairobi, Kenya
+Escalated and tracked 80 bug reports with reproduction steps, which the engineering team shipped as fixes within two sprints.
+Handled 50+ support conversations a day over WhatsApp and email for a lending product with 20,000 users.
+Rewrote 12 help-centre articles, reducing repeat "how do I repay" tickets by a fifth.
+SKILLS
+JavaScript  ·  TypeScript  ·  React  ·  Node.js  ·  PostgreSQL  ·  Python  ·  Customer Support  ·  HubSpot  ·  Cold Outreach  ·  Technical Writing  ·  Figma  ·  Git  ·  REST APIs  ·  Zendesk
