@@ -20,7 +20,8 @@ export function getSupabase(): SupabaseClient | null {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: false,
+        // GitHub OAuth returns with a code in the URL; the client exchanges it.
+        detectSessionInUrl: true,
         storageKey: 'jobflow.auth',
       },
       realtime: { params: { eventsPerSecond: 2 } },

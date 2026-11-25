@@ -70,11 +70,21 @@ are different facts, and the UI says so.
 focused, but never below 3 per role for students and never below 2 — a role that
 shows one lonely line looks like a gap, not a discipline.
 
-**Personal data stays yours.** Authentication is Supabase anonymous sign-in;
-`workspace_id` is the auth user id, and every row is guarded by row-level security.
-Anonymous sessions are deleted after 30 days of inactivity (a `pg_cron` reaper
-scoped to JobFlow's own profiles — the project hosts other apps' tables and nothing
-outside `jobflow_*` and JobFlow's own auth users is touched).
+**Personal data stays yours.** `workspace_id` is the auth user id and every row is
+guarded by row-level security. The app signs in anonymously when the project allows
+it; when it does not, it offers **Continue with GitHub**, which keeps the same
+uid-based workspace but survives a cleared browser and follows you to another
+machine. Anonymous sessions are deleted after 30 days of inactivity by a `pg_cron`
+reaper scoped to JobFlow's own profiles — the project hosts other apps' tables and
+nothing outside `jobflow_*` and JobFlow's own auth users is touched.
+
+**The first thing you see is a real profile.** `lib/seed-profile.ts` holds the
+owner's actual CV — projects, education, skills, contact details — transcribed, not
+invented. A fresh workspace is seeded once (per workspace id, so a deliberately
+emptied workspace stays empty), which means Discover is scored against real evidence
+from the first second instead of against an empty form. It contains **no employment
+history**: the resume renders summary → education → projects → skills, and sections
+with nothing in them are dropped rather than left as empty headings.
 
 **If anonymous sign-in is off**, the app does not fail: postings are public data and
 keep loading from Supabase, while your profile, resumes and applications stay in
@@ -182,12 +192,28 @@ The service-role key is never in the app, never in the repo, and never in this R
 
 ### Manual steps (a human must do these)
 
-1. **Enable anonymous sign-in** — Supabase dashboard → Authentication → Providers →
-   Anonymous. It is off by default; until it is on, the app runs in local-profile mode.
+1. **Enable anonymous sign-in** (optional) — Supabase dashboard → Authentication →
+   Providers → Anonymous. It is off on this project, so the app offers GitHub
+   sign-in instead. Anonymous sessions get a 30-day reaper; GitHub sessions do not.
+   If GitHub sign-in reports that the email is already registered, either enable
+   "Link accounts that use the same email" or delete the older account.
 2. **Rotate the service-role key** that was exposed during development, then update the
    Edge Function secret. Nothing in this repo contains it.
 3. **Set `CRON_SECRET`** on the Edge Function and in your own shell if you trigger
    forced runs by hand.
+
+### Auth model in one paragraph
+
+The spec's default is a Supabase anonymous session, and that is what the code tries
+first. This project has anonymous sign-in switched off and GitHub enabled, so the
+browser falls back to `Continue with GitHub`, and the write guard
+(`jobflow_can_write()`) accepts any authenticated end-user session. That guard was
+originally narrower — anonymous or GitHub-provider only — which turned out to be a
+trap: Supabase keeps the *original* provider when an identity is linked, so a real
+account with a linked GitHub identity would have been locked out of its own
+workspace by its own security policy. Tenancy is enforced where it belongs, by
+`workspace_id = auth.uid()`; the restrictive guard's remaining job is to keep
+non-user sessions out.
 
 ### Migrations applied
 
@@ -197,6 +223,8 @@ The service-role key is never in the app, never in the repo, and never in this R
 | `jobflow_grants` | `usage` on schema `public`; `select` on public postings for `anon`; full CRUD for the service role; app tables for `authenticated` only |
 | `jobflow_anonymous_guard_and_geo_default` | `geo_tier` defaults to `unknown` (not the enum's first label); postings reject client writes at the policy layer; the run log is read-only for clients |
 | `jobflow_anonymous_guard_via_auth_users` | `jobflow_is_anonymous()` — a `security definer` helper that reads `auth.users.is_anonymous`, backing restrictive policies on all three personal tables |
+| `jobflow_github_identity_guard` | adds `jobflow_can_write()`, accepting an anonymous session or a GitHub identity |
+| `jobflow_guard_accepts_end_users` | course correction: `jobflow_can_write()` becomes "any authenticated end-user session" — see the auth-model note above |
 
 `pg_cron` schedules: `jobflow-ingest-4x-daily` (02:07, 08:07, 14:07, 20:07 UTC) and
 `jobflow-reap-anonymous` (03:15 UTC, deletes anonymous accounts untouched for 30 days,
@@ -212,8 +240,8 @@ anonymous sign-in was switched on:
 - a second account sees **none** of the first account's rows;
 - writing a row with someone else's `workspace_id` is rejected by the row-level check;
 - an `anon` (unauthenticated) request can read postings but is denied every write;
-- a permanent, email-signed-in account is denied writes entirely — the workspace model
-  is an anonymous-session model by design.
+- the owner's real account (provider `email`) can write to its own workspace — which
+  is the correction that produced `jobflow_guard_accepts_end_users`.
 
 Postings were also read over HTTP with the publishable key exactly as the browser does
 it: `200`, 357 rows, no `description` on list responses.

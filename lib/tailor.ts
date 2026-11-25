@@ -261,7 +261,15 @@ export function tailorResume(profile: Profile, job: Job): TailorResult {
     },
     links: profile.links.map((l) => sanitizeText(l.url, 200)).filter(Boolean),
     summary: buildSummary(profile, job, match.matched),
-    sections: defaultSections(profile.isStudent),
+    // A section with nothing in it is noise: a student with no employers should
+    // not see an empty "Experience" heading in their resume.
+    sections: defaultSections(profile.isStudent).filter((section) => {
+      if (section === 'experience') return experience.length > 0;
+      if (section === 'projects') return projects.length > 0;
+      if (section === 'education') return profile.education.length > 0;
+      if (section === 'skills') return profile.skills.length > 0;
+      return true;
+    }),
     experience,
     projects,
     education: profile.education.map((e) => ({

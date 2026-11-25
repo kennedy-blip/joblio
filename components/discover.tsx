@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   Filter,
+  Github,
   RefreshCw,
   Search,
   Sparkles,
@@ -28,7 +29,7 @@ const LEVELS: Level[] = ['entry', 'mid', 'senior'];
 const COOLDOWN_MS = 10 * 60 * 1000;
 
 export function Discover() {
-  const { store, mode, ready, notice } = useSession();
+  const { store, mode, ready, notice, anonymousOff, signInWithGitHub, busy } = useSession();
   const router = useRouter();
 
   const [jobs, setJobs] = useState<Job[] | null>(null);
@@ -259,11 +260,24 @@ export function Discover() {
           <div className="flex flex-wrap items-start gap-2 rounded-xl2 border border-ochre/40 bg-ochreSoft/70 px-4 py-3 text-[12.5px] leading-relaxed text-[#6a4d0f]">
             {mode === 'local' ? <WifiOff className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : null}
             <span className="max-w-3xl">{notice}</span>
-            {mode === 'local' ? (
-              <button onClick={() => void loadSample()} className="btn btn-xs ml-auto">
-                Load sample profile
-              </button>
-            ) : null}
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              {mode === 'local' ? (
+                <button onClick={() => void loadSample()} className="btn btn-xs">
+                  Load sample profile
+                </button>
+              ) : null}
+              {mode === 'local' && anonymousOff ? (
+                <button
+                  onClick={() => void signInWithGitHub()}
+                  disabled={busy}
+                  className="btn btn-xs btn-primary"
+                  title="Sign in with GitHub to keep your work across devices"
+                >
+                  <Github className="h-3.5 w-3.5" />
+                  Continue with GitHub
+                </button>
+              ) : null}
+            </div>
           </div>
         ) : null}
 

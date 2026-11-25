@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, Database, Download, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import { Check, Copy, Database, Download, Github, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import { useSession } from '@/components/session-provider';
 import { ProfileForm, emptyProfile } from '@/components/profile-form';
 import { ConfirmButton, Toast } from '@/components/ui-extra';
@@ -11,7 +11,7 @@ import { SAMPLE_PROFILE } from '@/lib/sample';
 import type { Profile } from '@/lib/types';
 
 export function ProfilePage() {
-  const { store, ready, mode, workspaceId, notice } = useSession();
+  const { store, ready, mode, workspaceId, notice, anonymousOff, signInWithGitHub, busy } = useSession();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -110,8 +110,8 @@ export function ProfilePage() {
         </h2>
         <p className="mb-4 max-w-2xl text-[12.5px] leading-relaxed text-muted">
           {mode === 'cloud'
-            ? 'You are signed in anonymously: Supabase issues a real account with no email, and row-level security makes this row readable only by that account. Supabase does not delete anonymous accounts automatically — this project ships a daily reaper that removes them after 30 days of inactivity. Add an email later and the same workspace keeps your data.'
-            : 'You are in local mode: profile, resumes and applications live in this browser only. Nothing has been sent to a server, and clearing site data deletes it.'}
+            ? 'You are signed in — either anonymously (Supabase issues a real account with no email) or with GitHub. Row-level security makes these rows readable only by that account. Anonymous accounts are removed after 30 days of inactivity by this project\'s daily reaper; a GitHub sign-in is not.'
+            : 'You are in local mode: profile, resumes and applications live in this browser only. Nothing has been sent to a server, and clearing site data deletes it. Sign in with GitHub to keep them on any device.'}
         </p>
 
         <dl className="mb-4 grid gap-3 sm:grid-cols-3">
@@ -142,6 +142,11 @@ export function ProfilePage() {
         </dl>
 
         <div className="flex flex-wrap gap-2">
+          {mode === 'local' && anonymousOff ? (
+            <button className="btn btn-xs btn-primary" onClick={() => void signInWithGitHub()} disabled={busy}>
+              <Github className="h-3.5 w-3.5" /> Continue with GitHub
+            </button>
+          ) : null}
           <button className="btn btn-xs" onClick={() => void exportAll()}>
             <Download className="h-3.5 w-3.5" /> Export everything (JSON)
           </button>
