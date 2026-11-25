@@ -191,10 +191,32 @@ The service-role key is never in the app, never in the repo, and never in this R
 
 ### Migrations applied
 
-`jobflow_keep_original_model` (stores the pre-tailoring model, protected by a trigger),
-`jobflow_grants` (`usage` on schema `public`, `select` on public postings, full CRUD for
-the service role, app tables for authenticated users), plus `pg_cron` schedules
-`jobflow-ingest-4x-daily` and `jobflow-reap-anonymous`.
+| Migration | What it does |
+| --- | --- |
+| `jobflow_keep_original_model` | `jobflow_resumes.original_model` + a trigger that keeps the pre-tailoring model intact |
+| `jobflow_grants` | `usage` on schema `public`; `select` on public postings for `anon`; full CRUD for the service role; app tables for `authenticated` only |
+| `jobflow_anonymous_guard_and_geo_default` | `geo_tier` defaults to `unknown` (not the enum's first label); postings reject client writes at the policy layer; the run log is read-only for clients |
+| `jobflow_anonymous_guard_via_auth_users` | `jobflow_is_anonymous()` — a `security definer` helper that reads `auth.users.is_anonymous`, backing restrictive policies on all three personal tables |
+
+`pg_cron` schedules: `jobflow-ingest-4x-daily` (02:07, 08:07, 14:07, 20:07 UTC) and
+`jobflow-reap-anonymous` (03:15 UTC, deletes anonymous accounts untouched for 30 days,
+scoped to users who have a JobFlow profile).
+
+### Security, verified rather than assumed
+
+The write path was exercised against the real database as a simulated session before
+anonymous sign-in was switched on:
+
+- an anonymous account can insert a profile, a resume and an application, and update
+  them (including `edited_by_user`);
+- a second account sees **none** of the first account's rows;
+- writing a row with someone else's `workspace_id` is rejected by the row-level check;
+- an `anon` (unauthenticated) request can read postings but is denied every write;
+- a permanent, email-signed-in account is denied writes entirely — the workspace model
+  is an anonymous-session model by design.
+
+Postings were also read over HTTP with the publishable key exactly as the browser does
+it: `200`, 357 rows, no `description` on list responses.
 
 ---
 
